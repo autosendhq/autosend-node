@@ -1,6 +1,7 @@
 import type { AutosendConfig, AutosendApiError } from "../core/types.js";
 
-const DEFAULT_BASE_URL = "http://localhost:6001/v1";
+const DEFAULT_BASE_URL =
+  process.env.AUTOSEND_BASE_URL ?? "https://api.autosend.com/v1";
 const DEFAULT_TIMEOUT = 30000;
 const DEFAULT_MAX_RETRIES = 3;
 
