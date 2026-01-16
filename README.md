@@ -1,5 +1,8 @@
 # Autosend Node.js SDK
 
+<img width="2400" height="1260" alt="send-emails-with-nodejs" src="https://github.com/user-attachments/assets/5ba58031-429c-4c03-95c9-b8ef62599ba3" />
+
+
 [![npm version](https://img.shields.io/npm/v/autosendjs.svg)](https://www.npmjs.com/package/autosendjs)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
