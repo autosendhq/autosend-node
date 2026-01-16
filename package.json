@@ -2,28 +2,28 @@
   "name": "autosendjs",
   "version": "1.0.0",
   "description": "Node.js SDK for Autosend with Resend-compatible adapter",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.mjs",
+  "types": "./dist/cjs/index.d.ts",
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.mjs"
+        "types": "./dist/esm/index.d.mts",
+        "default": "./dist/esm/index.mjs"
       },
       "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.cjs"
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
       }
     },
     "./resend": {
       "import": {
-        "types": "./dist/adapters/resend/index.d.ts",
-        "default": "./dist/adapters/resend/index.mjs"
+        "types": "./dist/esm/adapters/resend/index.d.mts",
+        "default": "./dist/esm/adapters/resend/index.mjs"
       },
       "require": {
-        "types": "./dist/adapters/resend/index.d.ts",
-        "default": "./dist/adapters/resend/index.cjs"
+        "types": "./dist/cjs/adapters/resend/index.d.ts",
+        "default": "./dist/cjs/adapters/resend/index.js"
       }
     }
   },
