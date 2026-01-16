@@ -1,6 +1,6 @@
 # Autosend Node.js SDK
 
-![nodejs-og](https://github.com/user-attachments/assets/5ba58031-429c-4c03-95c9-b8ef62599ba3)
+![nodejs-og](https://github.com/user-attachments/assets/1b66c98a-e5ce-48b8-9a05-0ed701f7e7e4)
 
 [![npm version](https://img.shields.io/npm/v/autosendjs.svg)](https://www.npmjs.com/package/autosendjs)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
