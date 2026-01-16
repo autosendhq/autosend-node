@@ -36,7 +36,7 @@ describe("HttpClient", () => {
     });
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "https://api.autosend.com/contacts/123",
+      "https://api.autosend.com/v1/contacts/123",
       expect.objectContaining({
         method: "GET",
         headers: {
@@ -70,7 +70,7 @@ describe("HttpClient", () => {
     });
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "https://api.autosend.com/mails/send",
+      "https://api.autosend.com/v1/mails/send",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify(requestBody),

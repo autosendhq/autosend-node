@@ -110,7 +110,7 @@ describe("Resend Adapter", () => {
       });
 
       expect(capturedBody).toMatchObject({
-        to: [{ email: "one@example.com" }, { email: "two@example.com" }],
+        recipients: [{ email: "one@example.com" }, { email: "two@example.com" }],
       });
     });
 

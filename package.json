@@ -1,29 +1,29 @@
 {
-  "name": "autosend",
+  "name": "autosendjs",
   "version": "1.0.0",
   "description": "Node.js SDK for Autosend with Resend-compatible adapter",
-  "main": "./dist/cjs/index.cjs",
-  "module": "./dist/esm/index.mjs",
-  "types": "./dist/types/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/types/index.d.ts",
-        "default": "./dist/esm/index.mjs"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
       },
       "require": {
-        "types": "./dist/types/index.d.ts",
-        "default": "./dist/cjs/index.cjs"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.cjs"
       }
     },
     "./resend": {
       "import": {
-        "types": "./dist/types/adapters/resend/index.d.ts",
-        "default": "./dist/esm/adapters/resend/index.mjs"
+        "types": "./dist/adapters/resend/index.d.ts",
+        "default": "./dist/adapters/resend/index.mjs"
       },
       "require": {
-        "types": "./dist/types/adapters/resend/index.d.ts",
-        "default": "./dist/cjs/adapters/resend/index.cjs"
+        "types": "./dist/adapters/resend/index.d.ts",
+        "default": "./dist/adapters/resend/index.cjs"
       }
     }
   },
@@ -31,10 +31,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "npm run build:esm && npm run build:cjs && npm run build:types",
-    "build:esm": "tsc -p tsconfig.esm.json && node scripts/fix-esm.js",
-    "build:cjs": "tsc -p tsconfig.cjs.json && node scripts/fix-cjs.js",
-    "build:types": "tsc -p tsconfig.types.json",
+    "build": "tsup",
     "test": "vitest run --coverage",
     "test:watch": "vitest",
     "clean": "rm -rf dist",
@@ -52,6 +49,7 @@
   "devDependencies": {
     "@types/node": "^25.0.8",
     "@vitest/coverage-v8": "^2.1.0",
+    "tsup": "^8.5.1",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
   },
