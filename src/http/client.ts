@@ -90,9 +90,16 @@ export class HttpClient {
           };
         }
 
-        const data = (await response.json()) as T;
+        const json = (await response.json()) as { success?: boolean; data?: T } | T;
         this.log(`Response:`, { status: response.status });
 
+        // Server wraps responses in { success: true, data: T } format
+        // Unwrap to extract the actual data
+        const data = (
+          typeof json === "object" && json !== null && "data" in json
+            ? json.data
+            : json
+        ) as T;
         return { success: true, data };
       } catch (err) {
         lastError = err as Error;
