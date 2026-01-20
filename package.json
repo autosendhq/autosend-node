@@ -1,0 +1,60 @@
+{
+  "name": "autosendjs",
+  "version": "1.0.0",
+  "description": "Node.js SDK for Autosend with Resend-compatible adapter",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.mjs",
+  "types": "./dist/cjs/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.mts",
+        "default": "./dist/esm/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    },
+    "./resend": {
+      "import": {
+        "types": "./dist/esm/adapters/resend/index.d.mts",
+        "default": "./dist/esm/adapters/resend/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/adapters/resend/index.d.ts",
+        "default": "./dist/cjs/adapters/resend/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build && npm test"
+  },
+  "keywords": [
+    "email",
+    "autosend",
+    "resend",
+    "transactional",
+    "sdk"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^25.0.8",
+    "@vitest/coverage-v8": "^2.1.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "sideEffects": false
+}
