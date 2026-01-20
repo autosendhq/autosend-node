@@ -1,11 +1,11 @@
-# Autosend Node.js SDK
+# AutoSend Node.js SDK
 
 ![nodejs-og](https://github.com/user-attachments/assets/1b66c98a-e5ce-48b8-9a05-0ed701f7e7e4)
 
 [![npm version](https://img.shields.io/npm/v/autosendjs.svg)](https://www.npmjs.com/package/autosendjs)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Node.js SDK for the [Autosend](https://autosend.com) API.
+The official Node.js SDK for the [AutoSend](https://autosend.com) API.
 
 ## Installation
 
@@ -21,7 +21,7 @@ yarn add autosendjs
 
 ## Setup
 
-First, get your API key from the [Autosend Dashboard](https://autosend.com/dashboard).
+First, get your API key from the [AutoSend Dashboard](https://autosend.com/dashboard).
 
 ```typescript
 import { Autosend } from "autosendjs";
@@ -126,14 +126,14 @@ const autosend = new Autosend("as_xxxxxxxxxxxx", {
 });
 ```
 
-## Resend Compatibility
+## Resend Adapter
 
-Autosend provides a drop-in replacement adapter for the Resend API:
+AutoSend provides a drop-in replacement adapter for the Resend API:
 
 ```typescript
 import { Resend } from "autosendjs/resend";
 
-const resend = new Resend("re_xxxxxxxxxxxx");
+const resend = new Resend("as_xxxxxxxxxxxx");
 
 await resend.emails.send({
   from: "you@example.com",
