@@ -2,9 +2,17 @@
   "name": "autosendjs",
   "version": "1.0.0",
   "description": "Node.js SDK for Autosend with Resend-compatible adapter",
+  "type": "commonjs",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.mjs",
   "types": "./dist/cjs/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "resend": [
+        "./dist/cjs/adapters/resend/index.d.ts"
+      ]
+    }
+  },
   "exports": {
     ".": {
       "import": {
