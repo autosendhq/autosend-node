@@ -48,6 +48,10 @@ export function toAutosendRequest(resendOptions: ResendSendOptions): AutosendSen
     request.replyTo = replyTos[0];
   }
 
+  if (resendOptions.variables) {
+    request.dynamicData = resendOptions.variables;
+  }
+
   return request;
 }
 
@@ -103,6 +107,7 @@ export interface BulkSendRequest {
   text?: string;
   replyTo?: EmailAddress;
   recipients: EmailAddress[];
+  dynamicData?: Record<string, string | number>;
 }
 
 export function toAutosendBulkRequest(resendOptions: ResendSendOptions): BulkSendRequest {
@@ -125,6 +130,10 @@ export function toAutosendBulkRequest(resendOptions: ResendSendOptions): BulkSen
   if (resendOptions.replyTo) {
     const replyTos = parseEmailAddresses(resendOptions.replyTo);
     request.replyTo = replyTos[0];
+  }
+
+  if (resendOptions.variables) {
+    request.dynamicData = resendOptions.variables;
   }
 
   return request;

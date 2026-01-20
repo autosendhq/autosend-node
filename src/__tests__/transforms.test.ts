@@ -156,6 +156,28 @@ describe("toAutosendRequest", () => {
 
     expect(result.to).toEqual({ email: "single@example.com" });
   });
+
+  it("should transform variables to dynamicData", () => {
+    const result = toAutosendRequest({
+      from: "sender@example.com",
+      to: "recipient@example.com",
+      subject: "Test",
+      html: "<p>Hello {{name}}</p>",
+      variables: { name: "John", orderTotal: 99.99 },
+    });
+
+    expect(result.dynamicData).toEqual({ name: "John", orderTotal: 99.99 });
+  });
+
+  it("should not include dynamicData when variables not provided", () => {
+    const result = toAutosendRequest({
+      from: "sender@example.com",
+      to: "recipient@example.com",
+      subject: "Test",
+    });
+
+    expect(result.dynamicData).toBeUndefined();
+  });
 });
 
 describe("toResendResponse", () => {
