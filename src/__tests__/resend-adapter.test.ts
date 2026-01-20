@@ -274,6 +274,31 @@ describe("Resend Adapter", () => {
         replyTo: { name: "Reply Person", email: "reply@example.com" },
       });
     });
+
+    it("should transform variables to dynamicData", async () => {
+      let capturedBody: unknown;
+      global.fetch = vi.fn().mockImplementation((_url, options) => {
+        capturedBody = JSON.parse(options.body);
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve({ emailId: "email-123" }),
+        });
+      });
+
+      const client = new Resend("test-api-key");
+      await client.emails.send({
+        from: "sender@example.com",
+        to: "recipient@example.com",
+        subject: "Hello {{name}}",
+        html: "<p>Your order total is {{orderTotal}}</p>",
+        variables: { name: "John", orderTotal: 99.99 },
+      });
+
+      expect(capturedBody).toMatchObject({
+        dynamicData: { name: "John", orderTotal: 99.99 },
+      });
+    });
   });
 
   describe("contacts.create", () => {

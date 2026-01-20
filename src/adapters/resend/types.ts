@@ -11,6 +11,7 @@ export interface SendEmailOptions {
   attachments?: Attachment[];
   tags?: Tag[];
   scheduledAt?: string;
+  variables?: Record<string, string | number>;
 }
 
 export interface Attachment {

@@ -18,7 +18,7 @@ export interface SendEmailOptions {
   html?: string;
   text?: string;
   templateId?: string;
-  variables?: Record<string, string | number>;
+  dynamicData?: Record<string, string | number>;
   cc?: EmailAddress | EmailAddress[];
   bcc?: EmailAddress | EmailAddress[];
   replyTo?: EmailAddress;
