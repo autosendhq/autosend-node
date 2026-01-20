@@ -277,7 +277,7 @@ describe("Resend Adapter", () => {
   });
 
   describe("contacts.create", () => {
-    it("should create contact and return Resend format", async () => {
+    it("should create contact and return Resend format with id only", async () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
@@ -297,25 +297,105 @@ describe("Resend Adapter", () => {
         email: "new@example.com",
         firstName: "John",
         lastName: "Doe",
-        audienceId: "audience-123",
       });
 
       expect(result).toEqual({
-        data: {
-          id: "contact-123",
-          email: "new@example.com",
-          firstName: "John",
-          lastName: "Doe",
-          createdAt: "2024-01-01T00:00:00Z",
-          unsubscribed: false,
-        },
+        data: { id: "contact-123" },
         error: null,
       });
+    });
+
+    it("should create contact with properties", async () => {
+      let capturedBody: unknown;
+      global.fetch = vi.fn().mockImplementation((_url, options) => {
+        capturedBody = JSON.parse(options.body);
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () =>
+            Promise.resolve({
+              id: "contact-123",
+              email: "new@example.com",
+              firstName: "John",
+              customFields: { company: "Acme", tier: 1 },
+              createdAt: "2024-01-01T00:00:00Z",
+              updatedAt: "2024-01-01T00:00:00Z",
+            }),
+        });
+      });
+
+      const client = new Resend("test-api-key");
+      const result = await client.contacts.create({
+        email: "new@example.com",
+        firstName: "John",
+        properties: { company: "Acme", tier: 1 },
+      });
+
+      expect(capturedBody).toMatchObject({
+        email: "new@example.com",
+        customFields: { company: "Acme", tier: 1 },
+      });
+      expect(result.data).toEqual({ id: "contact-123" });
+    });
+
+    it("should create contact with listIds", async () => {
+      let capturedBody: unknown;
+      global.fetch = vi.fn().mockImplementation((_url, options) => {
+        capturedBody = JSON.parse(options.body);
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () =>
+            Promise.resolve({
+              id: "contact-123",
+              email: "new@example.com",
+              firstName: "John",
+              listIds: ["list-1", "list-2"],
+              createdAt: "2024-01-01T00:00:00Z",
+              updatedAt: "2024-01-01T00:00:00Z",
+            }),
+        });
+      });
+
+      const client = new Resend("test-api-key");
+      const result = await client.contacts.create({
+        email: "new@example.com",
+        firstName: "John",
+        listIds: ["list-1", "list-2"],
+      });
+
+      expect(capturedBody).toMatchObject({
+        email: "new@example.com",
+        listIds: ["list-1", "list-2"],
+      });
+      expect(result.data).toEqual({ id: "contact-123" });
+    });
+
+    it("should create contact with audienceId (ignored)", async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () =>
+          Promise.resolve({
+            id: "contact-123",
+            email: "new@example.com",
+            createdAt: "2024-01-01T00:00:00Z",
+            updatedAt: "2024-01-01T00:00:00Z",
+          }),
+      });
+
+      const client = new Resend("test-api-key");
+      const result = await client.contacts.create({
+        email: "new@example.com",
+        audienceId: "audience-123",
+      });
+
+      expect(result.data).toEqual({ id: "contact-123" });
     });
   });
 
   describe("contacts.get", () => {
-    it("should get contact and return Resend format", async () => {
+    it("should get contact by string ID", async () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
@@ -331,7 +411,7 @@ describe("Resend Adapter", () => {
       });
 
       const client = new Resend("test-api-key");
-      const result = await client.contacts.get("audience-123", "contact-123");
+      const result = await client.contacts.get("contact-123");
 
       expect(result).toEqual({
         data: {
@@ -341,9 +421,84 @@ describe("Resend Adapter", () => {
           lastName: null,
           createdAt: "2024-01-01T00:00:00Z",
           unsubscribed: false,
+          properties: undefined,
         },
         error: null,
       });
+    });
+
+    it("should get contact by object with id", async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () =>
+          Promise.resolve({
+            id: "contact-123",
+            email: "test@example.com",
+            firstName: "John",
+            lastName: null,
+            createdAt: "2024-01-01T00:00:00Z",
+            updatedAt: "2024-01-01T00:00:00Z",
+          }),
+      });
+
+      const client = new Resend("test-api-key");
+      const result = await client.contacts.get({ id: "contact-123" });
+
+      expect(result.data?.id).toBe("contact-123");
+    });
+
+    it("should get contact with properties", async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () =>
+          Promise.resolve({
+            id: "contact-123",
+            email: "test@example.com",
+            firstName: "John",
+            lastName: null,
+            customFields: { company: "Acme", tier: 2 },
+            createdAt: "2024-01-01T00:00:00Z",
+            updatedAt: "2024-01-01T00:00:00Z",
+          }),
+      });
+
+      const client = new Resend("test-api-key");
+      const result = await client.contacts.get("contact-123");
+
+      expect(result.data?.properties).toEqual({ company: "Acme", tier: 2 });
+    });
+
+    it("should get contact with listIds", async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () =>
+          Promise.resolve({
+            id: "contact-123",
+            email: "test@example.com",
+            firstName: "John",
+            lastName: null,
+            listIds: ["list-1", "list-2"],
+            createdAt: "2024-01-01T00:00:00Z",
+            updatedAt: "2024-01-01T00:00:00Z",
+          }),
+      });
+
+      const client = new Resend("test-api-key");
+      const result = await client.contacts.get("contact-123");
+
+      expect(result.data?.listIds).toEqual(["list-1", "list-2"]);
+    });
+
+    it("should return error for email-based lookup", async () => {
+      const client = new Resend("test-api-key");
+      const result = await client.contacts.get({ email: "test@example.com" });
+
+      expect(result.data).toBeNull();
+      expect(result.error?.name).toBe("validation_error");
+      expect(result.error?.message).toContain("Email-based lookup is not supported");
     });
 
     it("should return error for not found contact", async () => {
@@ -354,7 +509,7 @@ describe("Resend Adapter", () => {
       });
 
       const client = new Resend("test-api-key", { timeout: 1000 });
-      const result = await client.contacts.get("audience-123", "nonexistent");
+      const result = await client.contacts.get("nonexistent");
 
       expect(result.data).toBeNull();
       expect(result.error?.name).toBe("not_found");
@@ -362,7 +517,7 @@ describe("Resend Adapter", () => {
   });
 
   describe("contacts.update", () => {
-    it("should update contact", async () => {
+    it("should update contact by email and return id", async () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
@@ -378,30 +533,92 @@ describe("Resend Adapter", () => {
       });
 
       const client = new Resend("test-api-key");
-      const result = await client.contacts.update("audience-123", "contact-123", {
+      const result = await client.contacts.update({
         email: "updated@example.com",
         firstName: "Jane",
       });
 
-      expect(result.data).toMatchObject({
-        email: "updated@example.com",
-        firstName: "Jane",
+      expect(result.data).toEqual({ id: "contact-123" });
+    });
+
+    it("should update contact with properties", async () => {
+      let capturedBody: unknown;
+      global.fetch = vi.fn().mockImplementation((_url, options) => {
+        capturedBody = JSON.parse(options.body);
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () =>
+            Promise.resolve({
+              id: "contact-123",
+              email: "user@example.com",
+              firstName: "John",
+              customFields: { tier: "pro", level: 5 },
+              createdAt: "2024-01-01T00:00:00Z",
+              updatedAt: "2024-01-02T00:00:00Z",
+            }),
+        });
       });
+
+      const client = new Resend("test-api-key");
+      const result = await client.contacts.update({
+        email: "user@example.com",
+        properties: { tier: "pro", level: 5 },
+      });
+
+      expect(capturedBody).toMatchObject({
+        email: "user@example.com",
+        customFields: { tier: "pro", level: 5 },
+      });
+      expect(result.data).toEqual({ id: "contact-123" });
+    });
+
+    it("should update contact with listIds", async () => {
+      let capturedBody: unknown;
+      global.fetch = vi.fn().mockImplementation((_url, options) => {
+        capturedBody = JSON.parse(options.body);
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () =>
+            Promise.resolve({
+              id: "contact-123",
+              email: "user@example.com",
+              firstName: "John",
+              listIds: ["list-1", "list-2"],
+              createdAt: "2024-01-01T00:00:00Z",
+              updatedAt: "2024-01-02T00:00:00Z",
+            }),
+        });
+      });
+
+      const client = new Resend("test-api-key");
+      const result = await client.contacts.update({
+        email: "user@example.com",
+        listIds: ["list-1", "list-2"],
+      });
+
+      expect(capturedBody).toMatchObject({
+        email: "user@example.com",
+        listIds: ["list-1", "list-2"],
+      });
+      expect(result.data).toEqual({ id: "contact-123" });
     });
 
     it("should return error if email not provided", async () => {
       const client = new Resend("test-api-key");
-      const result = await client.contacts.update("audience-123", "contact-123", {
+      const result = await client.contacts.update({
         firstName: "Jane",
       });
 
       expect(result.data).toBeNull();
       expect(result.error?.name).toBe("validation_error");
+      expect(result.error?.message).toBe("Email is required for update");
     });
   });
 
   describe("contacts.remove", () => {
-    it("should delete contact", async () => {
+    it("should remove contact by string ID", async () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
@@ -409,12 +626,35 @@ describe("Resend Adapter", () => {
       });
 
       const client = new Resend("test-api-key");
-      const result = await client.contacts.remove("audience-123", "contact-123");
+      const result = await client.contacts.remove("contact-123");
 
       expect(result).toEqual({
-        data: { deleted: true },
+        data: { deleted: true, contact: "contact-123" },
         error: null,
       });
+    });
+
+    it("should remove contact by object with id", async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ deleted: true }),
+      });
+
+      const client = new Resend("test-api-key");
+      const result = await client.contacts.remove({ id: "contact-123" });
+
+      expect(result.data?.deleted).toBe(true);
+      expect(result.data?.contact).toBe("contact-123");
+    });
+
+    it("should return error for email-based removal", async () => {
+      const client = new Resend("test-api-key");
+      const result = await client.contacts.remove({ email: "test@example.com" });
+
+      expect(result.data).toBeNull();
+      expect(result.error?.name).toBe("validation_error");
+      expect(result.error?.message).toContain("Email-based removal is not supported");
     });
   });
 
@@ -435,7 +675,7 @@ describe("Resend Adapter", () => {
       });
 
       const client = new Resend("test-api-key");
-      const result = await client.contacts.remove("audience-123", "contact-123");
+      const result = await client.contacts.remove("contact-123");
 
       expect(result.data).toBeNull();
       expect(result.error).toBeDefined();
@@ -480,7 +720,6 @@ describe("Resend Adapter", () => {
       const client = new Resend("test-api-key");
       const result = await client.contacts.create({
         email: "test@example.com",
-        audienceId: "audience-123",
       });
 
       expect(result.data).toBeNull();
@@ -493,7 +732,6 @@ describe("Resend Adapter", () => {
       const client = new Resend("test-api-key");
       const result = await client.contacts.create({
         email: "test@example.com",
-        audienceId: "audience-123",
       });
 
       expect(result.data).toBeNull();
@@ -505,7 +743,7 @@ describe("Resend Adapter", () => {
       global.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
 
       const client = new Resend("test-api-key");
-      const result = await client.contacts.get("audience-123", "contact-123");
+      const result = await client.contacts.get("contact-123");
 
       expect(result.data).toBeNull();
       expect(result.error).toBeDefined();
@@ -519,7 +757,7 @@ describe("Resend Adapter", () => {
       });
 
       const client = new Resend("test-api-key");
-      const result = await client.contacts.update("audience-123", "contact-123", {
+      const result = await client.contacts.update({
         email: "test@example.com",
       });
 
@@ -531,7 +769,7 @@ describe("Resend Adapter", () => {
       global.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
 
       const client = new Resend("test-api-key");
-      const result = await client.contacts.update("audience-123", "contact-123", {
+      const result = await client.contacts.update({
         email: "test@example.com",
       });
 
@@ -543,7 +781,7 @@ describe("Resend Adapter", () => {
       global.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
 
       const client = new Resend("test-api-key");
-      const result = await client.contacts.remove("audience-123", "contact-123");
+      const result = await client.contacts.remove("contact-123");
 
       expect(result.data).toBeNull();
       expect(result.error).toBeDefined();

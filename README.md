@@ -98,6 +98,8 @@ await autosend.contacts.create({
   email: "user@gmail.com",
   firstName: "John",
   lastName: "Doe",
+  listIds: ["list_abc123"],
+  customFields: { company: "Acme", plan: "pro" },
 });
 
 // Get a contact
@@ -139,6 +141,25 @@ await resend.emails.send({
   subject: "Hello World",
   html: "<strong>It works!</strong>",
 });
+
+// Create a contact
+await resend.contacts.create({
+  email: "user@gmail.com",
+  firstName: "John",
+  properties: { company: "Acme" },
+});
+
+// Get a contact
+await resend.contacts.get("contact_id");
+
+// Update a contact (by email)
+await resend.contacts.update({
+  email: "user@gmail.com",
+  firstName: "Jane",
+});
+
+// Remove a contact
+await resend.contacts.remove("contact_id");
 ```
 
 You can also use the `RESEND_API_KEY` environment variable:

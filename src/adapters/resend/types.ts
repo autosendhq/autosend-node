@@ -39,12 +39,31 @@ export interface ApiResponse<T> {
   error: ErrorResponse | null;
 }
 
+// Match Resend SDK types exactly
+
 export interface CreateContactOptions {
+  audienceId?: string;
   email: string;
   firstName?: string;
   lastName?: string;
   unsubscribed?: boolean;
-  audienceId: string;
+  properties?: Record<string, string | number | null>;
+  listIds?: string[];
+}
+
+// Resend uses this for get/update/remove - identify by id OR email
+export type GetContactOptions = string | { id?: string; email?: string; audienceId?: string };
+export type RemoveContactOptions = string | { id?: string; email?: string; audienceId?: string };
+
+export interface UpdateContactOptions {
+  id?: string;
+  email?: string;
+  audienceId?: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  unsubscribed?: boolean;
+  properties?: Record<string, string | number | null>;
+  listIds?: string[];
 }
 
 export interface Contact {
@@ -54,18 +73,21 @@ export interface Contact {
   lastName: string | null;
   createdAt: string;
   unsubscribed: boolean;
+  properties?: Record<string, string | number>;
+  listIds?: string[];
 }
 
-export interface UpdateContactOptions {
-  email?: string;
-  firstName?: string;
-  lastName?: string;
-  unsubscribed?: boolean;
-  audienceId: string;
+export interface CreateContactResponse {
+  id: string;
 }
 
-export interface DeleteContactResponse {
+export interface UpdateContactResponse {
+  id: string;
+}
+
+export interface RemoveContactResponse {
   deleted: boolean;
+  contact: string;
 }
 
 export type ResendErrorName =

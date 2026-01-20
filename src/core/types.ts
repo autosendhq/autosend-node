@@ -50,6 +50,8 @@ export interface Contact {
   firstName?: string;
   lastName?: string;
   userId?: string;
+  listIds?: string[];
+  customFields?: Record<string, string | number>;
   createdAt: string;
   updatedAt: string;
 }
@@ -59,6 +61,8 @@ export interface CreateContactOptions {
   firstName?: string;
   lastName?: string;
   userId?: string;
+  listIds?: string[];
+  customFields?: Record<string, string | number | null>;
 }
 
 export interface CreateContactResponse {

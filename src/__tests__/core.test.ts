@@ -132,6 +132,64 @@ describe("Autosend", () => {
         data: mockContact,
       });
     });
+
+    it("should create contact with listIds", async () => {
+      const mockContact = {
+        id: "contact-123",
+        email: "new@example.com",
+        firstName: "John",
+        listIds: ["list-1", "list-2"],
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-01T00:00:00Z",
+      };
+
+      let capturedBody: unknown;
+      global.fetch = vi.fn().mockImplementation((_url, options) => {
+        capturedBody = JSON.parse(options.body);
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve(mockContact),
+        });
+      });
+
+      const client = new Autosend("test-api-key");
+      const result = await client.contacts.create({
+        email: "new@example.com",
+        firstName: "John",
+        listIds: ["list-1", "list-2"],
+      });
+
+      expect(capturedBody).toMatchObject({
+        email: "new@example.com",
+        listIds: ["list-1", "list-2"],
+      });
+      expect(result.success).toBe(true);
+      expect(result.data?.listIds).toEqual(["list-1", "list-2"]);
+    });
+
+    it("should create contact without listIds (backward compatibility)", async () => {
+      const mockContact = {
+        id: "contact-123",
+        email: "new@example.com",
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-01T00:00:00Z",
+      };
+
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve(mockContact),
+      });
+
+      const client = new Autosend("test-api-key");
+      const result = await client.contacts.create({
+        email: "new@example.com",
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data?.listIds).toBeUndefined();
+    });
   });
 
   describe("contacts.get", () => {
@@ -157,6 +215,29 @@ describe("Autosend", () => {
         success: true,
         data: mockContact,
       });
+    });
+
+    it("should get contact with listIds", async () => {
+      const mockContact = {
+        id: "contact-123",
+        email: "test@example.com",
+        firstName: "John",
+        listIds: ["list-1", "list-2", "list-3"],
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-01T00:00:00Z",
+      };
+
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve(mockContact),
+      });
+
+      const client = new Autosend("test-api-key");
+      const result = await client.contacts.get("contact-123");
+
+      expect(result.success).toBe(true);
+      expect(result.data?.listIds).toEqual(["list-1", "list-2", "list-3"]);
     });
 
     it("should handle contact not found", async () => {
@@ -215,6 +296,41 @@ describe("Autosend", () => {
         success: true,
         data: mockContact,
       });
+    });
+
+    it("should upsert contact with listIds", async () => {
+      const mockContact = {
+        id: "contact-123",
+        email: "test@example.com",
+        firstName: "Updated",
+        listIds: ["list-new"],
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-02T00:00:00Z",
+      };
+
+      let capturedBody: unknown;
+      global.fetch = vi.fn().mockImplementation((_url, options) => {
+        capturedBody = JSON.parse(options.body);
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve(mockContact),
+        });
+      });
+
+      const client = new Autosend("test-api-key");
+      const result = await client.contacts.upsert({
+        email: "test@example.com",
+        firstName: "Updated",
+        listIds: ["list-new"],
+      });
+
+      expect(capturedBody).toMatchObject({
+        email: "test@example.com",
+        listIds: ["list-new"],
+      });
+      expect(result.success).toBe(true);
+      expect(result.data?.listIds).toEqual(["list-new"]);
     });
 
     it("should handle upsert failure", async () => {
