@@ -1,4 +1,4 @@
-import type { EmailAddress, SendEmailOptions as AutosendSendOptions } from "../../core/types.js";
+import type { EmailAddress, BulkRecipient, SendEmailOptions as AutosendSendOptions } from "../../core/types.js";
 import type {
   SendEmailOptions as ResendSendOptions,
   ErrorResponse,
@@ -106,8 +106,10 @@ export interface BulkSendRequest {
   html?: string;
   text?: string;
   replyTo?: EmailAddress;
-  recipients: EmailAddress[];
+  recipients: BulkRecipient[];
   dynamicData?: Record<string, string | number>;
+  templateId?: string;
+  unsubscribeGroupId?: string;
 }
 
 export function toAutosendBulkRequest(resendOptions: ResendSendOptions): BulkSendRequest {

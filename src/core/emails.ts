@@ -11,7 +11,10 @@ interface ApiSendResponse {
 }
 
 interface ApiBulkSendResponse {
-  emailIds: string[];
+  batchId: string;
+  totalRecipients: number;
+  successCount: number;
+  failedCount: number;
 }
 
 export class Emails {
@@ -42,7 +45,10 @@ export class Emails {
       return {
         success: true,
         data: {
-          emailIds: response.data.emailIds,
+          batchId: response.data.batchId,
+          totalRecipients: response.data.totalRecipients,
+          successCount: response.data.successCount,
+          failedCount: response.data.failedCount,
         },
       };
     }
