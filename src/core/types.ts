@@ -32,6 +32,8 @@ export interface SendEmailOptions {
   replyTo?: EmailAddress;
 }
 
+export type SendEmailRequest = SendEmailOptions;
+
 export interface SendEmailResponse {
   success: boolean;
   data?: {
