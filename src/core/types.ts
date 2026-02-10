@@ -11,6 +11,14 @@ export interface EmailAddress {
   name?: string;
 }
 
+export interface BulkRecipient {
+  email: string;
+  name?: string;
+  dynamicData?: Record<string, string | number>;
+  cc?: EmailAddress[];
+  bcc?: EmailAddress[];
+}
+
 export interface SendEmailOptions {
   from: EmailAddress;
   to: EmailAddress | EmailAddress[];
@@ -24,6 +32,8 @@ export interface SendEmailOptions {
   replyTo?: EmailAddress;
 }
 
+export type SendEmailRequest = SendEmailOptions;
+
 export interface SendEmailResponse {
   success: boolean;
   data?: {
@@ -33,13 +43,24 @@ export interface SendEmailResponse {
 }
 
 export interface BulkSendEmailOptions {
-  emails: SendEmailOptions[];
+  from: EmailAddress;
+  subject?: string;
+  html?: string;
+  text?: string;
+  dynamicData?: Record<string, string | number>;
+  templateId?: string;
+  replyTo?: EmailAddress;
+  unsubscribeGroupId?: string;
+  recipients: BulkRecipient[];
 }
 
 export interface BulkSendEmailResponse {
   success: boolean;
   data?: {
-    emailIds: string[];
+    batchId: string;
+    totalRecipients: number;
+    successCount: number;
+    failedCount: number;
   };
   error?: string;
 }

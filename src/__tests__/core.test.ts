@@ -77,29 +77,94 @@ describe("Autosend", () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        json: () => Promise.resolve({ emailIds: ["email-1", "email-2"] }),
+        json: () =>
+          Promise.resolve({
+            batchId: "batch-123",
+            totalRecipients: 2,
+            successCount: 2,
+            failedCount: 0,
+          }),
       });
 
       const client = new Autosend("test-api-key");
       const result = await client.emails.bulk({
-        emails: [
-          {
-            from: { email: "sender@example.com" },
-            to: { email: "recipient1@example.com" },
-            subject: "Test 1",
-          },
-          {
-            from: { email: "sender@example.com" },
-            to: { email: "recipient2@example.com" },
-            subject: "Test 2",
-          },
+        from: { email: "sender@example.com" },
+        subject: "Test Bulk",
+        html: "<p>Hello {{name}}</p>",
+        recipients: [
+          { email: "recipient1@example.com" },
+          { email: "recipient2@example.com" },
         ],
       });
 
       expect(result).toEqual({
         success: true,
-        data: { emailIds: ["email-1", "email-2"] },
+        data: {
+          batchId: "batch-123",
+          totalRecipients: 2,
+          successCount: 2,
+          failedCount: 0,
+        },
       });
+    });
+
+    it("should reject empty recipients", async () => {
+      const client = new Autosend("test-api-key");
+      const result = await client.emails.bulk({
+        from: { email: "sender@example.com" },
+        subject: "Test",
+        recipients: [],
+      });
+
+      expect(result).toEqual({
+        success: false,
+        error: "At least one recipient is required",
+      });
+    });
+
+    it("should reject more than 100 recipients", async () => {
+      const client = new Autosend("test-api-key");
+      const recipients = Array.from({ length: 101 }, (_, i) => ({
+        email: `user${i}@example.com`,
+      }));
+      const result = await client.emails.bulk({
+        from: { email: "sender@example.com" },
+        subject: "Test",
+        recipients,
+      });
+
+      expect(result).toEqual({
+        success: false,
+        error:
+          "Recipient count 101 exceeds maximum of 100. Split into multiple bulk() calls.",
+      });
+    });
+
+    it("should accept exactly 100 recipients", async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () =>
+          Promise.resolve({
+            batchId: "batch-100",
+            totalRecipients: 100,
+            successCount: 100,
+            failedCount: 0,
+          }),
+      });
+
+      const client = new Autosend("test-api-key");
+      const recipients = Array.from({ length: 100 }, (_, i) => ({
+        email: `user${i}@example.com`,
+      }));
+      const result = await client.emails.bulk({
+        from: { email: "sender@example.com" },
+        subject: "Test",
+        recipients,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data?.batchId).toBe("batch-100");
     });
   });
 
@@ -359,7 +424,9 @@ describe("Autosend", () => {
 
       const client = new Autosend("test-api-key", { maxRetries: 1 });
       const result = await client.emails.bulk({
-        emails: [],
+        from: { email: "sender@example.com" },
+        subject: "Test",
+        recipients: [{ email: "recipient@example.com" }],
       });
 
       expect(result.success).toBe(false);

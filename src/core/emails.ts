@@ -11,8 +11,13 @@ interface ApiSendResponse {
 }
 
 interface ApiBulkSendResponse {
-  emailIds: string[];
+  batchId: string;
+  totalRecipients: number;
+  successCount: number;
+  failedCount: number;
 }
+
+const MAX_BULK_RECIPIENTS = 100;
 
 export class Emails {
   constructor(private readonly http: HttpClient) {}
@@ -36,13 +41,27 @@ export class Emails {
   }
 
   async bulk(options: BulkSendEmailOptions): Promise<BulkSendEmailResponse> {
+    if (options.recipients.length === 0) {
+      return { success: false, error: "At least one recipient is required" };
+    }
+
+    if (options.recipients.length > MAX_BULK_RECIPIENTS) {
+      return {
+        success: false,
+        error: `Recipient count ${options.recipients.length} exceeds maximum of ${MAX_BULK_RECIPIENTS}. Split into multiple bulk() calls.`,
+      };
+    }
+
     const response = await this.http.post<ApiBulkSendResponse>("/mails/bulk", options);
 
     if (response.success && response.data) {
       return {
         success: true,
         data: {
-          emailIds: response.data.emailIds,
+          batchId: response.data.batchId,
+          totalRecipients: response.data.totalRecipients,
+          successCount: response.data.successCount,
+          failedCount: response.data.failedCount,
         },
       };
     }
