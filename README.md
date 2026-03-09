@@ -69,19 +69,12 @@ import { Autosend } from "autosendjs";
 const autosend = new Autosend("as_xxxxxxxxxxxx");
 
 await autosend.emails.bulk({
-  emails: [
-    {
-      from: { email: "you@example.com" },
-      to: { email: "user1@gmail.com" },
-      subject: "Hello User 1",
-      html: "<p>Welcome!</p>",
-    },
-    {
-      from: { email: "you@example.com" },
-      to: { email: "user2@gmail.com" },
-      subject: "Hello User 2",
-      html: "<p>Welcome!</p>",
-    },
+  from: { email: "you@example.com" },
+  subject: "Hello",
+  html: "<p>Welcome!</p>",
+  recipients: [
+    { email: "user1@gmail.com" },
+    { email: "user2@gmail.com" },
   ],
 });
 ```
