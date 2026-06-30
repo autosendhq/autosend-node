@@ -6,6 +6,7 @@ import type {
   BulkSendEmailResponse,
 } from "./types.js";
 import { renderReact } from "./render-react.js";
+import { ERROR_MESSAGES } from "./constants.js";
 
 interface ApiSendResponse {
   emailId: string;
@@ -42,7 +43,7 @@ export class Emails {
     } catch (err) {
       return {
         success: false,
-        error: err instanceof Error ? err.message : "Failed to render React component",
+        error: err instanceof Error ? err.message : ERROR_MESSAGES.reactRenderError,
       };
     }
 
@@ -66,13 +67,16 @@ export class Emails {
 
   async bulk(options: BulkSendEmailOptions): Promise<BulkSendEmailResponse> {
     if (options.recipients.length === 0) {
-      return { success: false, error: "At least one recipient is required" };
+      return { success: false, error: ERROR_MESSAGES.atLeastOneRecipient };
     }
 
     if (options.recipients.length > MAX_BULK_RECIPIENTS) {
       return {
         success: false,
-        error: `Recipient count ${options.recipients.length} exceeds maximum of ${MAX_BULK_RECIPIENTS}. Split into multiple bulk() calls.`,
+        error: ERROR_MESSAGES.recipientLimitExceeded(
+          options.recipients.length,
+          MAX_BULK_RECIPIENTS
+        ),
       };
     }
 
@@ -82,7 +86,7 @@ export class Emails {
     } catch (err) {
       return {
         success: false,
-        error: err instanceof Error ? err.message : "Failed to render React component",
+        error: err instanceof Error ? err.message : ERROR_MESSAGES.reactRenderError,
       };
     }
 

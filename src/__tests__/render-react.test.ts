@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { renderReact } from "../core/render-react.js";
 import { Autosend } from "../core/client.js";
+import { ERROR_MESSAGES } from "../core/constants.js";
 
 // Force the lazy import to fail so the test is deterministic regardless of whether
 // @react-email/render happens to be installed/hoisted in the tree. The success
@@ -12,7 +13,7 @@ vi.mock("@react-email/render", () => {
 describe("renderReact", () => {
   it("throws a clear error when @react-email/render cannot be loaded", async () => {
     await expect(renderReact({ any: true })).rejects.toThrow(
-      "Failed to render React component. Make sure to install `@react-email/render` or `@react-email/components`."
+      ERROR_MESSAGES.reactRenderError
     );
   });
 });

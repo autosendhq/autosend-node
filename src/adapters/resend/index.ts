@@ -1,6 +1,7 @@
 import { Autosend as AutosendCore } from "../../core/client.js";
 import { EmailsAdapter } from "./emails.js";
 import { ContactsAdapter } from "./contacts.js";
+import { ERROR_MESSAGES } from "../../core/constants.js";
 
 export interface ResendOptions {
   baseUrl?: string;
@@ -17,9 +18,7 @@ export class Resend {
     const key = apiKey ?? process.env.RESEND_API_KEY;
 
     if (!key) {
-      throw new Error(
-        "Missing API key. Pass it to the constructor or set the RESEND_API_KEY environment variable."
-      );
+      throw new Error(ERROR_MESSAGES.missingApiKey);
     }
 
     const autosendClient = new AutosendCore(key, {

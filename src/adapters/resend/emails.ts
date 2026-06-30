@@ -9,6 +9,7 @@ import {
   toAutosendBulkRequest,
   mapHttpStatusToResendError,
 } from "./transforms.js";
+import { ERROR_MESSAGES } from "../../core/constants.js";
 
 export class EmailsAdapter {
   constructor(private readonly client: Autosend) {}
@@ -20,19 +21,19 @@ export class EmailsAdapter {
   async send(options: SendEmailOptions): Promise<ApiResponse<CreateEmailResponse>> {
     // Warn about unsupported features
     if (options.tags?.length) {
-      console.warn("Autosend: tags are not supported and will be ignored");
+      console.warn(ERROR_MESSAGES.unsupportedTags);
     }
 
     if (options.attachments?.length) {
-      console.warn("Autosend: attachments are not currently supported");
+      console.warn(ERROR_MESSAGES.unsupportedAttachments);
     }
 
     if (options.headers && Object.keys(options.headers).length > 0) {
-      console.warn("Autosend: custom headers are not supported and will be ignored");
+      console.warn(ERROR_MESSAGES.unsupportedHeaders);
     }
 
     if (options.scheduledAt) {
-      console.warn("Autosend: scheduledAt is not supported and will be ignored");
+      console.warn(ERROR_MESSAGES.unsupportedScheduledAt);
     }
 
     try {
@@ -56,7 +57,7 @@ export class EmailsAdapter {
         data: null,
         error: mapHttpStatusToResendError(
           response.statusCode || 500,
-          response.error ?? "Unknown error"
+          response.error ?? ERROR_MESSAGES.unknownError
         ),
       };
     } catch (err) {
@@ -64,7 +65,7 @@ export class EmailsAdapter {
         data: null,
         error: {
           name: "api_error",
-          message: err instanceof Error ? err.message : "Unknown error",
+          message: err instanceof Error ? err.message : ERROR_MESSAGES.unknownError,
         },
       };
     }
@@ -86,7 +87,7 @@ export class EmailsAdapter {
       data: null,
       error: mapHttpStatusToResendError(
         response.statusCode || 500,
-        response.error ?? "Unknown error"
+        response.error ?? ERROR_MESSAGES.unknownError
       ),
     };
   }

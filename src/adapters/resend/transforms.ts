@@ -4,6 +4,7 @@ import type {
   ErrorResponse,
   ResendErrorName,
 } from "./types.js";
+import { ERROR_MESSAGES } from "../../core/constants.js";
 
 export function parseEmailAddress(input: string): EmailAddress {
   const match = input.match(/^(.+?)\s*<(.+)>$/);
@@ -77,7 +78,7 @@ export function toResendResponse(autosendResponse: {
   return {
     data: null,
     error: {
-      message: autosendResponse.error ?? "Unknown error",
+      message: autosendResponse.error ?? ERROR_MESSAGES.unknownError,
       name: "api_error",
     },
   };

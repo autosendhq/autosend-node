@@ -1,4 +1,5 @@
 import type { AutosendConfig, AutosendApiError } from "../core/types.js";
+import { ERROR_MESSAGES } from "../core/constants.js";
 
 const DEFAULT_BASE_URL =
   process.env.AUTOSEND_BASE_URL ?? "https://api.autosend.com/v1";
@@ -73,7 +74,7 @@ export class HttpClient {
             const errorJson = JSON.parse(errorText);
             errorMessage = errorJson.message ?? errorJson.error ?? errorText;
           } catch {
-            errorMessage = errorText || `HTTP ${response.status}`;
+            errorMessage = errorText || ERROR_MESSAGES.httpStatusError(response.status);
           }
 
           if (this.isRetryableError(response.status) && attempt < this.maxRetries) {
@@ -107,7 +108,7 @@ export class HttpClient {
         if (lastError.name === "AbortError") {
           return {
             success: false,
-            error: "Request timeout",
+            error: ERROR_MESSAGES.requestTimeout,
             statusCode: 0,
           };
         }
@@ -123,7 +124,7 @@ export class HttpClient {
 
     return {
       success: false,
-      error: lastError?.message ?? "Unknown error",
+      error: lastError?.message ?? ERROR_MESSAGES.unknownError,
       statusCode: lastStatusCode,
     };
   }

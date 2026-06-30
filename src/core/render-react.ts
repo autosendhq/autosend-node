@@ -3,6 +3,7 @@
 // string-literal specifier lets bundlers (webpack, Vite, etc.) handle the
 // dynamic import without any extra configuration, and Node caches the module —
 // this mirrors how the `resend` SDK loads it, so it works as a drop-in.
+import { ERROR_MESSAGES } from "./constants.js";
 
 /**
  * Render a React element to an HTML string using `@react-email/render`.
@@ -18,9 +19,7 @@ export async function renderReact(react: unknown): Promise<string> {
     // resolved at runtime only when the `react` field is actually used.
     ({ render } = await import("@react-email/render"));
   } catch {
-    throw new Error(
-      "Failed to render React component. Make sure to install `@react-email/render` or `@react-email/components`."
-    );
+    throw new Error(ERROR_MESSAGES.reactRenderError);
   }
 
   return render(react);
