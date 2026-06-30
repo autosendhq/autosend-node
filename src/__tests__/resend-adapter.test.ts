@@ -68,6 +68,44 @@ describe("Resend Adapter", () => {
       });
     });
 
+    it("should map a 429 to rate_limit_exceeded (single send)", async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 429,
+        text: () => Promise.resolve(JSON.stringify({ message: "Too many requests" })),
+      });
+
+      const client = new Resend("test-api-key", { maxRetries: 1 });
+      const result = await client.emails.send({
+        from: "sender@example.com",
+        to: "recipient@example.com",
+        subject: "Test",
+      });
+
+      expect(result.data).toBeNull();
+      expect(result.error?.name).toBe("rate_limit_exceeded");
+      expect(result.error?.statusCode).toBe(429);
+    });
+
+    it("should map a 429 to rate_limit_exceeded (bulk send)", async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 429,
+        text: () => Promise.resolve(JSON.stringify({ message: "Too many requests" })),
+      });
+
+      const client = new Resend("test-api-key", { maxRetries: 1 });
+      const result = await client.emails.send({
+        from: "sender@example.com",
+        to: ["a@example.com", "b@example.com"],
+        subject: "Test",
+      });
+
+      expect(result.data).toBeNull();
+      expect(result.error?.name).toBe("rate_limit_exceeded");
+      expect(result.error?.statusCode).toBe(429);
+    });
+
     it("should transform from address with name", async () => {
       let capturedBody: unknown;
       global.fetch = vi.fn().mockImplementation((_url, options) => {

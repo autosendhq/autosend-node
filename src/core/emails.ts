@@ -5,6 +5,7 @@ import type {
   BulkSendEmailOptions,
   BulkSendEmailResponse,
 } from "./types.js";
+import { renderReact } from "./render-react.js";
 
 interface ApiSendResponse {
   emailId: string;
@@ -19,11 +20,24 @@ interface ApiBulkSendResponse {
 
 const MAX_BULK_RECIPIENTS = 100;
 
+// Render the `react` field to `html` (once) and drop `react` from the request
+// body. An explicit `html` always wins, matching Resend's behaviour.
+async function withRenderedReact<T extends { react?: unknown; html?: string }>(
+  options: T
+): Promise<Omit<T, "react">> {
+  const { react, ...rest } = options;
+  if (react != null && rest.html == null) {
+    (rest as { html?: string }).html = await renderReact(react);
+  }
+  return rest;
+}
+
 export class Emails {
   constructor(private readonly http: HttpClient) {}
 
   async send(options: SendEmailOptions): Promise<SendEmailResponse> {
-    const response = await this.http.post<ApiSendResponse>("/mails/send", options);
+    const body = await withRenderedReact(options);
+    const response = await this.http.post<ApiSendResponse>("/mails/send", body);
 
     if (response.success && response.data) {
       return {
@@ -37,6 +51,7 @@ export class Emails {
     return {
       success: false,
       error: response.error,
+      statusCode: response.statusCode,
     };
   }
 
@@ -52,7 +67,8 @@ export class Emails {
       };
     }
 
-    const response = await this.http.post<ApiBulkSendResponse>("/mails/bulk", options);
+    const body = await withRenderedReact(options);
+    const response = await this.http.post<ApiBulkSendResponse>("/mails/bulk", body);
 
     if (response.success && response.data) {
       return {
@@ -69,6 +85,7 @@ export class Emails {
     return {
       success: false,
       error: response.error,
+      statusCode: response.statusCode,
     };
   }
 }

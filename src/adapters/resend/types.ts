@@ -4,6 +4,7 @@ export interface SendEmailOptions {
   subject: string;
   html?: string;
   text?: string;
+  react?: unknown;
   cc?: string | string[];
   bcc?: string | string[];
   replyTo?: string | string[];

@@ -6,6 +6,7 @@ export interface ResendOptions {
   baseUrl?: string;
   timeout?: number;
   debug?: boolean;
+  maxRetries?: number;
 }
 
 export class Resend {
@@ -25,6 +26,7 @@ export class Resend {
       baseUrl: options.baseUrl,
       timeout: options.timeout,
       debug: options.debug,
+      maxRetries: options.maxRetries,
     });
 
     this.emails = new EmailsAdapter(autosendClient);

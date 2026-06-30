@@ -70,6 +70,24 @@ describe("Autosend", () => {
       expect(result.success).toBe(false);
       expect(result.error).toBe("Invalid email address");
     });
+
+    it("should expose statusCode on failure (e.g. 429)", async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 429,
+        text: () => Promise.resolve(JSON.stringify({ message: "Rate limited" })),
+      });
+
+      const client = new Autosend("test-api-key", { maxRetries: 1 });
+      const result = await client.emails.send({
+        from: { email: "sender@example.com" },
+        to: { email: "recipient@example.com" },
+        subject: "Test",
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.statusCode).toBe(429);
+    });
   });
 
   describe("emails.bulk", () => {
@@ -106,6 +124,25 @@ describe("Autosend", () => {
           failedCount: 0,
         },
       });
+    });
+
+    it("should expose statusCode on bulk failure (e.g. 429)", async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 429,
+        text: () => Promise.resolve(JSON.stringify({ message: "Rate limited" })),
+      });
+
+      const client = new Autosend("test-api-key", { maxRetries: 1 });
+      const result = await client.emails.bulk({
+        from: { email: "sender@example.com" },
+        subject: "Test",
+        html: "<p>Hi</p>",
+        recipients: [{ email: "recipient1@example.com" }],
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.statusCode).toBe(429);
     });
 
     it("should reject empty recipients", async () => {

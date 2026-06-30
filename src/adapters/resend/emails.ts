@@ -9,6 +9,7 @@ import {
   toAutosendBulkRequest,
   mapHttpStatusToResendError,
 } from "./transforms.js";
+import { renderReact } from "../../core/render-react.js";
 
 interface BulkApiResponse {
   success: boolean;
@@ -49,12 +50,19 @@ export class EmailsAdapter {
     }
 
     try {
+      // Render the `react` field to `html` once, up front (an explicit `html`
+      // always wins), so both the single and bulk paths see a plain HTML body.
+      const resolved =
+        options.react != null && options.html == null
+          ? { ...options, html: await renderReact(options.react) }
+          : options;
+
       // If multiple recipients, use bulk API
-      if (this.getRecipientCount(options.to) > 1) {
-        return this.sendBulk(options);
+      if (this.getRecipientCount(resolved.to) > 1) {
+        return this.sendBulk(resolved);
       }
 
-      const autosendRequest = toAutosendRequest(options);
+      const autosendRequest = toAutosendRequest(resolved);
       const response = await this.client.emails.send(autosendRequest);
 
       if (response.success && response.data) {
@@ -66,7 +74,10 @@ export class EmailsAdapter {
 
       return {
         data: null,
-        error: mapHttpStatusToResendError(500, response.error ?? "Unknown error"),
+        error: mapHttpStatusToResendError(
+          response.statusCode ?? 500,
+          response.error ?? "Unknown error"
+        ),
       };
     } catch (err) {
       return {
@@ -94,7 +105,7 @@ export class EmailsAdapter {
     const errorMessage = response.data?.error?.message ?? response.error ?? "Unknown error";
     return {
       data: null,
-      error: mapHttpStatusToResendError(500, errorMessage),
+      error: mapHttpStatusToResendError(response.statusCode ?? 500, errorMessage),
     };
   }
 }
