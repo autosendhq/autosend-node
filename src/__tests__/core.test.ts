@@ -88,6 +88,29 @@ describe("Autosend", () => {
       expect(result.success).toBe(false);
       expect(result.statusCode).toBe(429);
     });
+
+    it("should forward bypassSuppressions in the request body", async () => {
+      let body: any;
+      global.fetch = vi.fn().mockImplementation((_url, options) => {
+        body = JSON.parse(options.body);
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve({ emailId: "email-123" }),
+        });
+      });
+
+      const client = new Autosend("test-api-key");
+      await client.emails.send({
+        from: { email: "sender@example.com" },
+        to: { email: "recipient@example.com" },
+        subject: "Test",
+        html: "<p>Hi</p>",
+        bypassSuppressions: true,
+      });
+
+      expect(body.bypassSuppressions).toBe(true);
+    });
   });
 
   describe("emails.bulk", () => {

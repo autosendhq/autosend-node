@@ -31,6 +31,7 @@ export interface SendEmailOptions {
   cc?: EmailAddress | EmailAddress[];
   bcc?: EmailAddress | EmailAddress[];
   replyTo?: EmailAddress;
+  bypassSuppressions?: boolean;
 }
 
 export type SendEmailRequest = SendEmailOptions;
@@ -54,6 +55,7 @@ export interface BulkSendEmailOptions {
   templateId?: string;
   replyTo?: EmailAddress;
   unsubscribeGroupId?: string;
+  bypassSuppressions?: boolean;
   recipients: BulkRecipient[];
 }
 

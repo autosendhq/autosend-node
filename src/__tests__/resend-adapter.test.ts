@@ -68,6 +68,29 @@ describe("Resend Adapter", () => {
       });
     });
 
+    it("should forward bypassSuppressions in the request body", async () => {
+      let body: any;
+      global.fetch = vi.fn().mockImplementation((_url, options) => {
+        body = JSON.parse(options.body);
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve({ emailId: "email-123" }),
+        });
+      });
+
+      const client = new Resend("test-api-key");
+      await client.emails.send({
+        from: "sender@example.com",
+        to: "recipient@example.com",
+        subject: "Test",
+        html: "<p>Hi</p>",
+        bypassSuppressions: true,
+      });
+
+      expect(body.bypassSuppressions).toBe(true);
+    });
+
     it("should map a 429 to rate_limit_exceeded (single send)", async () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: false,

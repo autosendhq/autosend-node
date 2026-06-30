@@ -57,6 +57,10 @@ export function toAutosendRequest(resendOptions: ResendSendOptions): AutosendSen
     request.dynamicData = resendOptions.variables;
   }
 
+  if (resendOptions.bypassSuppressions != null) {
+    request.bypassSuppressions = resendOptions.bypassSuppressions;
+  }
+
   return request;
 }
 
@@ -116,6 +120,7 @@ export interface BulkSendRequest {
   dynamicData?: Record<string, string | number>;
   templateId?: string;
   unsubscribeGroupId?: string;
+  bypassSuppressions?: boolean;
 }
 
 export function toAutosendBulkRequest(resendOptions: ResendSendOptions): BulkSendRequest {
@@ -146,6 +151,10 @@ export function toAutosendBulkRequest(resendOptions: ResendSendOptions): BulkSen
 
   if (resendOptions.variables) {
     request.dynamicData = resendOptions.variables;
+  }
+
+  if (resendOptions.bypassSuppressions != null) {
+    request.bypassSuppressions = resendOptions.bypassSuppressions;
   }
 
   return request;

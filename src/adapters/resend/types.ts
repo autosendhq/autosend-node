@@ -13,6 +13,7 @@ export interface SendEmailOptions {
   tags?: Tag[];
   scheduledAt?: string;
   variables?: Record<string, string | number>;
+  bypassSuppressions?: boolean;
 }
 
 export interface Attachment {
