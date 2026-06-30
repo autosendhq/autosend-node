@@ -36,7 +36,16 @@ export class Emails {
   constructor(private readonly http: HttpClient) {}
 
   async send(options: SendEmailOptions): Promise<SendEmailResponse> {
-    const body = await withRenderedReact(options);
+    let body;
+    try {
+      body = await withRenderedReact(options);
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Failed to render React component",
+      };
+    }
+
     const response = await this.http.post<ApiSendResponse>("/mails/send", body);
 
     if (response.success && response.data) {
@@ -67,7 +76,16 @@ export class Emails {
       };
     }
 
-    const body = await withRenderedReact(options);
+    let body;
+    try {
+      body = await withRenderedReact(options);
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Failed to render React component",
+      };
+    }
+
     const response = await this.http.post<ApiBulkSendResponse>("/mails/bulk", body);
 
     if (response.success && response.data) {

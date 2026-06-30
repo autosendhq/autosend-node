@@ -106,6 +106,23 @@ describe("Resend Adapter", () => {
       expect(result.error?.statusCode).toBe(429);
     });
 
+    it("should map a timeout (statusCode 0) to internal_server_error, not application_error", async () => {
+      const abortError = new Error("aborted");
+      abortError.name = "AbortError";
+      global.fetch = vi.fn().mockRejectedValue(abortError);
+
+      const client = new Resend("test-api-key", { maxRetries: 1 });
+      const result = await client.emails.send({
+        from: "sender@example.com",
+        to: "recipient@example.com",
+        subject: "Test",
+      });
+
+      expect(result.data).toBeNull();
+      expect(result.error?.name).toBe("internal_server_error");
+      expect(result.error?.statusCode).toBe(500);
+    });
+
     it("should transform from address with name", async () => {
       let capturedBody: unknown;
       global.fetch = vi.fn().mockImplementation((_url, options) => {

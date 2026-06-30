@@ -9,20 +9,6 @@ import {
   toAutosendBulkRequest,
   mapHttpStatusToResendError,
 } from "./transforms.js";
-import { renderReact } from "../../core/render-react.js";
-
-interface BulkApiResponse {
-  success: boolean;
-  data?: {
-    batchId: string;
-    totalRecipients: number;
-    successCount: number;
-    failedCount: number;
-  };
-  error?: {
-    message: string;
-  };
-}
 
 export class EmailsAdapter {
   constructor(private readonly client: Autosend) {}
@@ -50,19 +36,13 @@ export class EmailsAdapter {
     }
 
     try {
-      // Render the `react` field to `html` once, up front (an explicit `html`
-      // always wins), so both the single and bulk paths see a plain HTML body.
-      const resolved =
-        options.react != null && options.html == null
-          ? { ...options, html: await renderReact(options.react) }
-          : options;
-
-      // If multiple recipients, use bulk API
-      if (this.getRecipientCount(resolved.to) > 1) {
-        return this.sendBulk(resolved);
+      // If multiple recipients, use bulk API. The `react` field (if any) is
+      // forwarded through the transforms and rendered once by the core client.
+      if (this.getRecipientCount(options.to) > 1) {
+        return this.sendBulk(options);
       }
 
-      const autosendRequest = toAutosendRequest(resolved);
+      const autosendRequest = toAutosendRequest(options);
       const response = await this.client.emails.send(autosendRequest);
 
       if (response.success && response.data) {
@@ -75,7 +55,7 @@ export class EmailsAdapter {
       return {
         data: null,
         error: mapHttpStatusToResendError(
-          response.statusCode ?? 500,
+          response.statusCode || 500,
           response.error ?? "Unknown error"
         ),
       };
@@ -92,20 +72,22 @@ export class EmailsAdapter {
 
   private async sendBulk(options: SendEmailOptions): Promise<ApiResponse<CreateEmailResponse>> {
     const bulkRequest = toAutosendBulkRequest(options);
-    const response = await this.client.http.post<BulkApiResponse>("/mails/bulk", bulkRequest);
+    const response = await this.client.emails.bulk(bulkRequest);
 
-    if (response.success && response.data?.data?.batchId) {
+    if (response.success && response.data) {
       // Return the batch ID for compatibility with Resend's single response format
       return {
-        data: { id: response.data.data.batchId },
+        data: { id: response.data.batchId },
         error: null,
       };
     }
 
-    const errorMessage = response.data?.error?.message ?? response.error ?? "Unknown error";
     return {
       data: null,
-      error: mapHttpStatusToResendError(response.statusCode ?? 500, errorMessage),
+      error: mapHttpStatusToResendError(
+        response.statusCode || 500,
+        response.error ?? "Unknown error"
+      ),
     };
   }
 }
