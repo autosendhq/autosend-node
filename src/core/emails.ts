@@ -22,7 +22,7 @@ interface ApiBulkSendResponse {
 const MAX_BULK_RECIPIENTS = 100;
 
 // Render the `react` field to `html` (once) and drop `react` from the request
-// body. An explicit `html` always wins, matching Resend's behaviour.
+// body. An explicit `html` always takes precedence over `react`.
 async function withRenderedReact<T extends { react?: unknown; html?: string }>(
   options: T
 ): Promise<Omit<T, "react">> {
