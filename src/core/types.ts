@@ -25,11 +25,13 @@ export interface SendEmailOptions {
   subject: string;
   html?: string;
   text?: string;
+  react?: unknown;
   templateId?: string;
   dynamicData?: Record<string, string | number>;
   cc?: EmailAddress | EmailAddress[];
   bcc?: EmailAddress | EmailAddress[];
   replyTo?: EmailAddress;
+  bypassSuppressions?: boolean;
 }
 
 export type SendEmailRequest = SendEmailOptions;
@@ -40,6 +42,7 @@ export interface SendEmailResponse {
     emailId: string;
   };
   error?: string;
+  statusCode?: number;
 }
 
 export interface BulkSendEmailOptions {
@@ -47,10 +50,12 @@ export interface BulkSendEmailOptions {
   subject?: string;
   html?: string;
   text?: string;
+  react?: unknown;
   dynamicData?: Record<string, string | number>;
   templateId?: string;
   replyTo?: EmailAddress;
   unsubscribeGroupId?: string;
+  bypassSuppressions?: boolean;
   recipients: BulkRecipient[];
 }
 
@@ -63,6 +68,7 @@ export interface BulkSendEmailResponse {
     failedCount: number;
   };
   error?: string;
+  statusCode?: number;
 }
 
 export interface Contact {

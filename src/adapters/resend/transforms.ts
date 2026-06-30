@@ -4,6 +4,7 @@ import type {
   ErrorResponse,
   ResendErrorName,
 } from "./types.js";
+import { ERROR_MESSAGES } from "../../core/constants.js";
 
 export function parseEmailAddress(input: string): EmailAddress {
   const match = input.match(/^(.+?)\s*<(.+)>$/);
@@ -35,6 +36,10 @@ export function toAutosendRequest(resendOptions: ResendSendOptions): AutosendSen
     request.text = resendOptions.text;
   }
 
+  if (resendOptions.react != null) {
+    request.react = resendOptions.react;
+  }
+
   if (resendOptions.cc) {
     request.cc = parseEmailAddresses(resendOptions.cc);
   }
@@ -50,6 +55,10 @@ export function toAutosendRequest(resendOptions: ResendSendOptions): AutosendSen
 
   if (resendOptions.variables) {
     request.dynamicData = resendOptions.variables;
+  }
+
+  if (resendOptions.bypassSuppressions != null) {
+    request.bypassSuppressions = resendOptions.bypassSuppressions;
   }
 
   return request;
@@ -73,7 +82,7 @@ export function toResendResponse(autosendResponse: {
   return {
     data: null,
     error: {
-      message: autosendResponse.error ?? "Unknown error",
+      message: autosendResponse.error ?? ERROR_MESSAGES.unknownError,
       name: "api_error",
     },
   };
@@ -105,11 +114,13 @@ export interface BulkSendRequest {
   subject: string;
   html?: string;
   text?: string;
+  react?: unknown;
   replyTo?: EmailAddress;
   recipients: BulkRecipient[];
   dynamicData?: Record<string, string | number>;
   templateId?: string;
   unsubscribeGroupId?: string;
+  bypassSuppressions?: boolean;
 }
 
 export function toAutosendBulkRequest(resendOptions: ResendSendOptions): BulkSendRequest {
@@ -129,6 +140,10 @@ export function toAutosendBulkRequest(resendOptions: ResendSendOptions): BulkSen
     request.text = resendOptions.text;
   }
 
+  if (resendOptions.react != null) {
+    request.react = resendOptions.react;
+  }
+
   if (resendOptions.replyTo) {
     const replyTos = parseEmailAddresses(resendOptions.replyTo);
     request.replyTo = replyTos[0];
@@ -136,6 +151,10 @@ export function toAutosendBulkRequest(resendOptions: ResendSendOptions): BulkSen
 
   if (resendOptions.variables) {
     request.dynamicData = resendOptions.variables;
+  }
+
+  if (resendOptions.bypassSuppressions != null) {
+    request.bypassSuppressions = resendOptions.bypassSuppressions;
   }
 
   return request;

@@ -4,6 +4,7 @@ export interface SendEmailOptions {
   subject: string;
   html?: string;
   text?: string;
+  react?: unknown;
   cc?: string | string[];
   bcc?: string | string[];
   replyTo?: string | string[];
@@ -12,6 +13,7 @@ export interface SendEmailOptions {
   tags?: Tag[];
   scheduledAt?: string;
   variables?: Record<string, string | number>;
+  bypassSuppressions?: boolean;
 }
 
 export interface Attachment {

@@ -11,6 +11,7 @@ import type {
   RemoveContactResponse,
 } from "./types.js";
 import { mapHttpStatusToResendError } from "./transforms.js";
+import { ERROR_MESSAGES } from "../../core/constants.js";
 
 export class ContactsAdapter {
   constructor(private readonly client: Autosend) {}
@@ -35,14 +36,14 @@ export class ContactsAdapter {
 
       return {
         data: null,
-        error: mapHttpStatusToResendError(500, response.error ?? "Unknown error"),
+        error: mapHttpStatusToResendError(500, response.error ?? ERROR_MESSAGES.unknownError),
       };
     } catch (err) {
       return {
         data: null,
         error: {
           name: "api_error",
-          message: err instanceof Error ? err.message : "Unknown error",
+          message: err instanceof Error ? err.message : ERROR_MESSAGES.unknownError,
         },
       };
     }
@@ -60,7 +61,7 @@ export class ContactsAdapter {
           data: null,
           error: {
             name: "validation_error",
-            message: "Contact ID is required. Email-based lookup is not supported.",
+            message: ERROR_MESSAGES.contactIdRequiredLookup,
           },
         };
       }
@@ -85,14 +86,14 @@ export class ContactsAdapter {
 
       return {
         data: null,
-        error: mapHttpStatusToResendError(404, response.error ?? "Contact not found"),
+        error: mapHttpStatusToResendError(404, response.error ?? ERROR_MESSAGES.contactNotFound),
       };
     } catch (err) {
       return {
         data: null,
         error: {
           name: "api_error",
-          message: err instanceof Error ? err.message : "Unknown error",
+          message: err instanceof Error ? err.message : ERROR_MESSAGES.unknownError,
         },
       };
     }
@@ -109,7 +110,7 @@ export class ContactsAdapter {
           data: null,
           error: {
             name: "validation_error",
-            message: "Email is required for update",
+            message: ERROR_MESSAGES.emailRequiredUpdate,
           },
         };
       }
@@ -131,14 +132,14 @@ export class ContactsAdapter {
 
       return {
         data: null,
-        error: mapHttpStatusToResendError(500, response.error ?? "Unknown error"),
+        error: mapHttpStatusToResendError(500, response.error ?? ERROR_MESSAGES.unknownError),
       };
     } catch (err) {
       return {
         data: null,
         error: {
           name: "api_error",
-          message: err instanceof Error ? err.message : "Unknown error",
+          message: err instanceof Error ? err.message : ERROR_MESSAGES.unknownError,
         },
       };
     }
@@ -154,7 +155,7 @@ export class ContactsAdapter {
           data: null,
           error: {
             name: "validation_error",
-            message: "Contact ID is required. Email-based removal is not supported.",
+            message: ERROR_MESSAGES.contactIdRequiredRemoval,
           },
         };
       }
@@ -170,14 +171,14 @@ export class ContactsAdapter {
 
       return {
         data: null,
-        error: mapHttpStatusToResendError(500, response.error ?? "Unknown error"),
+        error: mapHttpStatusToResendError(500, response.error ?? ERROR_MESSAGES.unknownError),
       };
     } catch (err) {
       return {
         data: null,
         error: {
           name: "api_error",
-          message: err instanceof Error ? err.message : "Unknown error",
+          message: err instanceof Error ? err.message : ERROR_MESSAGES.unknownError,
         },
       };
     }

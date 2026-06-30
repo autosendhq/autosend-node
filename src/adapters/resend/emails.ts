@@ -9,19 +9,7 @@ import {
   toAutosendBulkRequest,
   mapHttpStatusToResendError,
 } from "./transforms.js";
-
-interface BulkApiResponse {
-  success: boolean;
-  data?: {
-    batchId: string;
-    totalRecipients: number;
-    successCount: number;
-    failedCount: number;
-  };
-  error?: {
-    message: string;
-  };
-}
+import { ERROR_MESSAGES } from "../../core/constants.js";
 
 export class EmailsAdapter {
   constructor(private readonly client: Autosend) {}
@@ -33,23 +21,24 @@ export class EmailsAdapter {
   async send(options: SendEmailOptions): Promise<ApiResponse<CreateEmailResponse>> {
     // Warn about unsupported features
     if (options.tags?.length) {
-      console.warn("Autosend: tags are not supported and will be ignored");
+      console.warn(ERROR_MESSAGES.unsupportedTags);
     }
 
     if (options.attachments?.length) {
-      console.warn("Autosend: attachments are not currently supported");
+      console.warn(ERROR_MESSAGES.unsupportedAttachments);
     }
 
     if (options.headers && Object.keys(options.headers).length > 0) {
-      console.warn("Autosend: custom headers are not supported and will be ignored");
+      console.warn(ERROR_MESSAGES.unsupportedHeaders);
     }
 
     if (options.scheduledAt) {
-      console.warn("Autosend: scheduledAt is not supported and will be ignored");
+      console.warn(ERROR_MESSAGES.unsupportedScheduledAt);
     }
 
     try {
-      // If multiple recipients, use bulk API
+      // If multiple recipients, use bulk API. The `react` field (if any) is
+      // forwarded through the transforms and rendered once by the core client.
       if (this.getRecipientCount(options.to) > 1) {
         return this.sendBulk(options);
       }
@@ -66,14 +55,17 @@ export class EmailsAdapter {
 
       return {
         data: null,
-        error: mapHttpStatusToResendError(500, response.error ?? "Unknown error"),
+        error: mapHttpStatusToResendError(
+          response.statusCode || 500,
+          response.error ?? ERROR_MESSAGES.unknownError
+        ),
       };
     } catch (err) {
       return {
         data: null,
         error: {
           name: "api_error",
-          message: err instanceof Error ? err.message : "Unknown error",
+          message: err instanceof Error ? err.message : ERROR_MESSAGES.unknownError,
         },
       };
     }
@@ -81,20 +73,22 @@ export class EmailsAdapter {
 
   private async sendBulk(options: SendEmailOptions): Promise<ApiResponse<CreateEmailResponse>> {
     const bulkRequest = toAutosendBulkRequest(options);
-    const response = await this.client.http.post<BulkApiResponse>("/mails/bulk", bulkRequest);
+    const response = await this.client.emails.bulk(bulkRequest);
 
-    if (response.success && response.data?.data?.batchId) {
+    if (response.success && response.data) {
       // Return the batch ID for compatibility with Resend's single response format
       return {
-        data: { id: response.data.data.batchId },
+        data: { id: response.data.batchId },
         error: null,
       };
     }
 
-    const errorMessage = response.data?.error?.message ?? response.error ?? "Unknown error";
     return {
       data: null,
-      error: mapHttpStatusToResendError(500, errorMessage),
+      error: mapHttpStatusToResendError(
+        response.statusCode || 500,
+        response.error ?? ERROR_MESSAGES.unknownError
+      ),
     };
   }
 }

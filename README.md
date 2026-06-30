@@ -79,6 +79,62 @@ await autosend.emails.bulk({
 });
 ```
 
+### Personalize with dynamic data
+
+Use `{{variable}}` placeholders in your email body and provide a `dynamicData`
+object to fill them in. Placeholders work in a raw `html` body, in `templateId`
+templates, and inside HTML attributes such as `href="{{unsubscribeURL}}"`. They
+are supported by both `emails.send` and `emails.bulk`.
+
+With `emails.bulk`, pass a `dynamicData` object per recipient to personalize a
+single body for each one:
+
+```typescript
+await autosend.emails.bulk({
+  from: { email: "you@example.com" },
+  subject: "Your weekly report",
+  html: '<p>Hi {{name}}!</p><a href="{{unsubscribeURL}}">Unsubscribe</a>',
+  recipients: [
+    {
+      email: "user1@gmail.com",
+      dynamicData: { name: "Ada", unsubscribeURL: "https://app.example.com/u/abc" },
+    },
+    {
+      email: "user2@gmail.com",
+      dynamicData: { name: "Linus", unsubscribeURL: "https://app.example.com/u/def" },
+    },
+  ],
+});
+```
+
+### Send a React email
+
+Pass a [React Email](https://react.email) element as `react` and the SDK renders
+it to HTML for you. This requires the optional `@react-email/render` dependency:
+
+```bash
+npm install @react-email/render
+```
+
+```tsx
+import { Autosend } from "autosendjs";
+import { WelcomeEmail } from "./emails/welcome";
+
+const autosend = new Autosend("as_xxxxxxxxxxxx");
+
+await autosend.emails.send({
+  from: { email: "you@example.com" },
+  to: { email: "user@gmail.com" },
+  subject: "Welcome",
+  react: <WelcomeEmail name="Ada" />,
+});
+```
+
+The `react` field is also supported on `emails.bulk`. The element is rendered
+once, while per-recipient values are still applied from each recipient's
+`dynamicData` — keep `{{...}}` placeholders in your component for those. If both
+`html` and `react` are set, `html` takes precedence.
+
 ### Manage contacts
 
 ```typescript
@@ -119,6 +175,12 @@ const autosend = new Autosend("as_xxxxxxxxxxxx", {
 });
 ```
 
+Retryable errors (HTTP `429` and `5xx`) are retried up to `maxRetries` times with
+exponential backoff. Set `maxRetries: 1` to disable retries — for example, a cron
+job that should halt on throttling rather than wait it out. When a request fails,
+the `emails.send` and `emails.bulk` responses include the HTTP `statusCode` (such
+as `429`) so you can handle it accordingly.
+
 ## Resend Adapter
 
 AutoSend provides a drop-in replacement adapter for the Resend API:
@@ -134,6 +196,20 @@ await resend.emails.send({
   subject: "Hello World",
   html: "<strong>It works!</strong>",
 });
+
+// Render a React Email element (requires @react-email/render):
+await resend.emails.send({
+  from: "you@example.com",
+  to: "user@gmail.com",
+  subject: "Welcome",
+  react: <WelcomeEmail name="Ada" />,
+});
+
+// Rate-limited responses surface as error.name === "rate_limit_exceeded":
+const { data, error } = await resend.emails.send({ /* ... */ });
+if (error?.name === "rate_limit_exceeded") {
+  // back off and retry later
+}
 
 // Create a contact
 await resend.contacts.create({
