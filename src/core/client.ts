@@ -1,6 +1,7 @@
 import { HttpClient } from "../http/client.js";
 import { Emails } from "./emails.js";
 import { Contacts } from "./contacts.js";
+import { InboundEmails } from "./inbound-emails.js";
 import type { AutosendConfig } from "./types.js";
 
 export interface AutosendOptions {
@@ -13,6 +14,7 @@ export interface AutosendOptions {
 export class Autosend {
   public readonly emails: Emails;
   public readonly contacts: Contacts;
+  public readonly inboundEmails: InboundEmails;
   public readonly http: HttpClient;
 
   constructor(apiKey: string, options: AutosendOptions = {}) {
@@ -25,5 +27,6 @@ export class Autosend {
 
     this.emails = new Emails(this.http);
     this.contacts = new Contacts(this.http);
+    this.inboundEmails = new InboundEmails(this.http);
   }
 }
