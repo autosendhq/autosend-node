@@ -35,12 +35,35 @@ export class HttpClient {
     return status === 429 || status >= 500;
   }
 
+  private buildUrl(
+    path: string,
+    query?: Record<string, string | number | boolean | undefined | null>
+  ): string {
+    const url = `${this.baseUrl}${path}`;
+
+    if (!query) {
+      return url;
+    }
+
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(query)) {
+      if (value === undefined || value === null || value === "") {
+        continue;
+      }
+      params.append(key, String(value));
+    }
+
+    const queryString = params.toString();
+    return queryString ? `${url}?${queryString}` : url;
+  }
+
   async request<T>(
     method: "GET" | "POST" | "DELETE",
     path: string,
-    body?: unknown
+    body?: unknown,
+    query?: Record<string, string | number | boolean | undefined | null>
   ): Promise<{ success: boolean; data?: T; error?: string; statusCode?: number }> {
-    const url = `${this.baseUrl}${path}`;
+    const url = this.buildUrl(path, query);
 
     this.log(`${method} ${path}`, body ? { body: "..." } : undefined);
 
@@ -129,8 +152,11 @@ export class HttpClient {
     };
   }
 
-  async get<T>(path: string): Promise<{ success: boolean; data?: T; error?: string; statusCode?: number }> {
-    return this.request<T>("GET", path);
+  async get<T>(
+    path: string,
+    query?: Record<string, string | number | boolean | undefined | null>
+  ): Promise<{ success: boolean; data?: T; error?: string; statusCode?: number }> {
+    return this.request<T>("GET", path, undefined, query);
   }
 
   async post<T>(
